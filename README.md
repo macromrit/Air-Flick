@@ -5,7 +5,7 @@
 <h1 align="center">Air Flick ✋</h1>
 
 > A gesture-based file transfer system — no wires, no taps, just air. 
-> This project was inspired by Huawei's gesture-based file transfer mechanism
+> This project was inspired by Huawei's gesture-based file transfer mechanism.
 
 ---
 
