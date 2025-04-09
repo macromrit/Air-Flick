@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam WebSocket Client</title>
+    <style>
+        :root {
+            --primary-color: #4a56e2;
+            --secondary-color: #66b2ff;
+            --background-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --btn-hover: #3647cf;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
+            color: var(--secondary-color);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff5252;
+            transition: background-color 0.3s;
+        }
+
+        .status-indicator.connected {
+            background-color: #4caf50;
+        }
+
+        .status-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        #video {
+            width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .overlay.active {
+            opacity: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 86, 226, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-start {
+            background-color: #4caf50;
+        }
+
+        .btn-start:hover {
+            background-color: #3d8b40;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-stop {
+            background-color: #ff5252;
+        }
+
+        .btn-stop:hover {
+            background-color: #e04343;
+            box-shadow: 0 5px 15px rgba(255, 82, 82, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .stats-item {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .recording-indicator {
+            display: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff5252;
+            animation: pulse 1.5s infinite;
+        }
+
+        .recording .recording-indicator {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Webcam Stream</h1>
+                <div class="status">
+                    <div id="status-indicator" class="status-indicator"></div>
+                    <span id="status-text" class="status-text">Disconnected</span>
+                </div>
+            </div>
+            
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div id="overlay" class="overlay">
+                    <div id="overlay-text"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn" class="btn btn-start">
+                    <span>Start Recording</span>
+                </button>
+                <button id="stop-btn" class="btn btn-stop" disabled>
+                    <span>Stop Recording</span>
+                    <span class="recording-indicator"></span>
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stats-item">
+                    <span id="fps">0</span> FPS
+                </div>
+                <div class="stats-item">
+                    <span id="resolution">0x0</span>
+                </div>
+                <div class="stats-item">
+                    Frames Sent: <span id="frames-count">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const startButton = document.getElementById('start-btn');
+        const stopButton = document.getElementById('stop-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const fpsDisplay = document.getElementById('fps');
+        const resolutionDisplay = document.getElementById('resolution');
+        const framesCountDisplay = document.getElementById('frames-count');
+        const overlay = document.getElementById('overlay');
+        const overlayText = document.getElementById('overlay-text');
+
+        let websocket = null;
+        let mediaStream = null;
+        let isStreaming = false;
+        let frameCount = 0;
+        let lastFrameTime = 0;
+        let frameInterval = null;
+        const targetFps = 30;
+        const frameDelay = 1000 / targetFps;
+
+        // Initialize webcam
+        async function initializeWebcam() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480 },
+                    audio: false
+                });
+                
+                videoElement.srcObject = mediaStream;
+                
+                // Wait for video to be ready
+                videoElement.onloadedmetadata = () => {
+                    canvasElement.width = videoElement.videoWidth;
+                    canvasElement.height = videoElement.videoHeight;
+                    resolutionDisplay.textContent = `${videoElement.videoWidth}x${videoElement.videoHeight}`;
+                    startButton.disabled = false;
+                };
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+                alert('Error accessing webcam. Please check permissions and try again.');
+            }
+        }
+
+        // Connect to WebSocket server
+        function connectWebSocket() {
+            websocket = new WebSocket('ws://localhost:8000/ws');
+            
+            websocket.onopen = () => {
+                statusIndicator.classList.add('connected');
+                statusText.textContent = 'Connected';
+                startStreaming();
+            };
+            
+            websocket.onclose = () => {
+                statusIndicator.classList.remove('connected');
+                statusText.textContent = 'Disconnected';
+                stopStreaming();
+            };
+            
+            websocket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                statusText.textContent = 'Connection Error';
+                stopStreaming();
+            };
+            
+            websocket.onmessage = (event) => {
+                const message = event.data;
+                
+                // Display server message
+                overlayText.textContent = message;
+                overlay.classList.add('active');
+                
+                // Stop streaming when receiving "Push" or "Pull"
+                if (message === 'Push' || message === 'Pull') {
+                    stopStreaming();
+                    websocket.close();
+                }
+                
+                // Hide overlay after 3 seconds
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                }, 3000);
+            };
+        }
+
+        // Capture and send frames
+        function captureAndSendFrame() {
+            if (!isStreaming || !websocket || websocket.readyState !== WebSocket.OPEN) return;
+            
+            // Calculate FPS
+            const now = performance.now();
+            const delta = now - lastFrameTime;
+            lastFrameTime = now;
+            
+            if (delta > 0) {
+                const currentFps = Math.round(1000 / delta);
+                fpsDisplay.textContent = currentFps;
+            }
+            
+            // Draw video frame to canvas
+            canvasCtx.drawImage(videoElement, 0, 0);
+            
+            // Convert canvas to blob and send via WebSocket
+            canvasElement.toBlob((blob) => {
+                if (blob && websocket && websocket.readyState === WebSocket.OPEN) {
+                    websocket.send(blob);
+                    frameCount++;
+                    framesCountDisplay.textContent = frameCount;
+                }
+            }, 'image/jpeg', 0.8);
+        }
+
+        // Start streaming
+        function startStreaming() {
+            if (isStreaming) return;
+            
+            isStreaming = true;
+            frameCount = 0;
+            framesCountDisplay.textContent = '0';
+            lastFrameTime = performance.now();
+            
+            // Add recording class for the pulse animation
+            stopButton.classList.add('recording');
+            
+            // Send frames at target FPS
+            frameInterval = setInterval(captureAndSendFrame, frameDelay);
+            
+            startButton.disabled = true;
+            stopButton.disabled = false;
+        }
+
+        // Stop streaming
+        function stopStreaming() {
+            if (!isStreaming) return;
+            
+            isStreaming = false;
+            
+            if (frameInterval) {
+                clearInterval(frameInterval);
+                frameInterval = null;
+            }
+            
+            stopButton.classList.remove('recording');
+            
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+
+        // Handle start button click
+        startButton.addEventListener('click', () => {
+            if (mediaStream) {
+                connectWebSocket();
+            } else {
+                initializeWebcam().then(connectWebSocket);
+            }
+        });
+
+        // Handle stop button click
+        stopButton.addEventListener('click', () => {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.close();
+            }
+            stopStreaming();
+        });
+
+        // Initialize webcam on page load
+        window.addEventListener('load', initializeWebcam);
+    </script>
+</body>
+</html>

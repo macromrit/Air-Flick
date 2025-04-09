@@ -1,0 +1,6 @@
+zeroconf
+fastapi
+uvicorn
+Pillow
+opencv-python
+mediapipe

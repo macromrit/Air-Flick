@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webcam WebSocket Client</title>
+    <link rel="stylesheet" href="styles.css"> </head>
+
+    <!-- <style>
+       
+    </style> -->
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Tranfer Files Via Air</h1>
+                <div class="status">
+                    <div id="status-indicator" class="status-indicator"></div>
+                    <span id="status-text" class="status-text">Disconnected</span>
+                </div>
+            </div>
+            
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div id="overlay" class="overlay">
+                    <div id="overlay-text"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="start-btn" class="btn btn-start">
+                    <span>Start Recording</span>
+                </button>
+                <button id="stop-btn" class="btn btn-stop" disabled>
+                    <span>Stop Recording</span>
+                    <span class="recording-indicator"></span>
+                </button>
+            </div>
+            
+            <div class="stats">
+                <div class="stats-item">
+                    <span id="fps">0</span> FPS
+                </div>
+                <div class="stats-item">
+                    <span id="resolution">0x0</span>
+                </div>
+                <div class="stats-item">
+                    Frames Sent: <span id="frames-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Uploader Card -->
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Upload Image</h1>
+                <div class="status">
+                    <span id="upload-status" class="status-text">Ready</span>
+                </div>
+            </div>
+            
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">📤</div>
+                <p>Click to browse or drag and drop image here</p>
+                <input type="file" id="image-upload" class="upload-input" accept="image/jpeg,image/png,image/webp">
+                
+                <div id="preview-container" class="preview-container">
+                    <img id="preview-image" class="preview-image" src="#" alt="Preview">
+                    <button id="remove-image" class="remove-image">×</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stats-item">
+                    Image will be sent when "Pull" gesture is detected
+                </div>
+                <div class="stats-item">
+                    Supported formats: JPG, PNG, WebP
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="notification" class="notification">Notification message</div>
+
+
+        <!-- Peer Image Popover -->
+    <div id="peer-popover" class="popover hidden">
+        <div class="popover-content">
+            <span id="close-popover" class="close-btn">&times;</span>
+            <img id="peer-image" src="" alt="Image from Peer" class="popover-image">
+        </div>
+    </div>
+
+    <script src="script.js"></script> <script type="module" src="module.js"></script>
+
+
+</body>
+</html>
