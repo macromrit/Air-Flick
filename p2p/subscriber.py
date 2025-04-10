@@ -12,20 +12,40 @@ from utils.list_remove_element import removeElement
 discovered_peers = []
 
 # step-1: a listener to detect devices in local subnet
+# class PeerListener(ServiceListener):
+#     def add_service(self, zeroconf, type, name):
+#         info = zeroconf.get_service_info(type, name)
+#         if info:
+#             ip = ".".join(map(str, info.addresses[0]))
+            
+#             if ip == get_local_ip(): # if discovered ip is of the same device, avoid self transmission
+#                 print("Self IP Detected.")
+#                 return
+            
+#             # else append
+#             print(f"[+] Discovered peer: {ip}")
+#             discovered_peers.append(ip)
+
 class PeerListener(ServiceListener):
     def add_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
         if info:
             ip = ".".join(map(str, info.addresses[0]))
             
-            if ip == get_local_ip(): # if discovered ip is of the same device, avoid self transmission
+            if ip == get_local_ip():
                 print("Self IP Detected.")
                 return
             
-            # else append
             print(f"[+] Discovered peer: {ip}")
             discovered_peers.append(ip)
 
+    def remove_service(self, zeroconf, type, name):
+        print(f"[-] Service removed: {name}")
+        # Optional: remove from discovered_peers if needed
+
+    def update_service(self, zeroconf, type, name):
+        # This method must be implemented to avoid NotImplementedError
+        print(f"[~] Service updated: {name}")
 
 # step-2: ping function to find the nearest peer
 def ping(ip):
