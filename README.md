@@ -11,8 +11,12 @@
 
 ## 🎥 Demo Video - Click on it
 
+
+<div align="center">
+
 [![Watch the Demo](https://img.youtube.com/vi/4BMhGjixC2U/0.jpg)](https://www.youtube.com/shorts/4BMhGjixC2U)
 
+</div>
 
 
 
