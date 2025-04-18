@@ -9,9 +9,21 @@
 
 ---
 
+## 🎥 Demo Video
+
+<p align="center">
+  <video width="80%" controls>
+    <source src="readme-assets/airflick_demo.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+</p>
+
+
+---
+
 ## 🌬️ About the Project
 
-**Air Flick** is a cutting-edge system that allows users to **transfer images between two devices** using simple hand gestures. With a swipe of your hand, files are lifted into the "air", and with another gesture, they are delivered to a nearby device — **completely touchless**.
+**Air Flick** is a system that allows users to **transfer images between two devices** using simple hand gestures. With a swipe of your hand, files are lifted into the "air", and with another gesture, they are delivered to a nearby device — **completely touchless**.
 
 Air Flick redefines the concept of file sharing by combining:
 - **Machine Learning gesture detection**
