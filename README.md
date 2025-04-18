@@ -9,14 +9,11 @@
 
 ---
 
-## 🎥 Demo Video
+## 🎥 Demo Video - Click on it
 
-<p align="center">
-  <video width="80%" controls>
-    <source src="readme-assets/airflick_demo.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</p>
+[![Watch the Demo](https://img.youtube.com/vi/4BMhGjixC2U/0.jpg)](https://www.youtube.com/shorts/4BMhGjixC2U)
+
+
 
 
 ---
